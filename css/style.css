@@ -659,3 +659,4 @@ body.theme-storm .weather-illustration { animation: shake 0.15s infinite; }
 @media (max-width: 480px) {
   .forecast-scroll { grid-template-columns: repeat(3, 1fr); }
   .stats-section   { grid-template-columns: repeat(2, 1fr); }
+}
