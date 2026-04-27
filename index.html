@@ -4,18 +4,29 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Weather Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
-  <div class="app-container">
+  <canvas id="weather-canvas"></canvas>
+
+  <div class="app-wrapper">
 
     <header class="app-header">
-      <div class="app-title">
-        <span class="title-icon">🌤️</span>
-        <span>Weather Dashboard</span>
+      <div class="app-brand">
+        <svg class="brand-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="4" fill="currentColor"/>
+          <path d="M12 2v2M12 20v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M2 12h2M20 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>Skyvision</span>
       </div>
       <div class="search-controls">
         <div class="search-bar">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
           <input
             type="text"
             id="search-input"
@@ -23,83 +34,111 @@
             aria-label="City search"
             autocomplete="off"
           />
-          <button id="search-btn" aria-label="Search">Search</button>
+          <button id="search-btn" aria-label="Search">Go</button>
         </div>
         <button id="unit-toggle" class="unit-btn" aria-label="Toggle temperature unit">°F</button>
       </div>
     </header>
 
     <div id="loading" class="state-panel" role="status" aria-live="polite">
-      <div class="spinner"></div>
-      <p>Fetching weather data…</p>
+      <div class="pulse-rings">
+        <div class="ring"></div>
+        <div class="ring"></div>
+        <div class="ring"></div>
+      </div>
+      <p class="loading-text">Fetching weather data…</p>
     </div>
 
     <div id="error" class="state-panel hidden" role="alert">
-      <div class="error-icon">⚠️</div>
+      <div class="error-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/>
+        </svg>
+      </div>
       <p id="error-message">Something went wrong.</p>
       <button id="retry-btn" class="retry-btn">Try Again</button>
     </div>
 
     <main id="weather-content" class="hidden">
 
-      <section class="current-section">
-        <div class="current-location">
-          <span class="pin-icon">📍</span>
-          <h2 id="city-name">Boston, MA</h2>
-          <span id="last-updated" class="last-updated"></span>
+      <section class="hero-section">
+        <div class="hero-left">
+          <div class="location-row">
+            <svg class="pin-svg" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+            <h2 id="city-name">Boston, MA</h2>
+            <span id="last-updated" class="last-updated"></span>
+          </div>
+          <div id="current-temp" class="hero-temp">--</div>
+          <div class="hero-desc-row">
+            <span id="current-desc" class="hero-desc">Clear Sky</span>
+          </div>
+          <div class="hero-hilo">
+            <span>H: <strong id="current-high">--</strong></span>
+            <span class="hilo-divider">·</span>
+            <span>L: <strong id="current-low">--</strong></span>
+          </div>
         </div>
+        <div class="hero-right">
+          <div id="weather-illustration" class="weather-illustration"></div>
+        </div>
+      </section>
 
-        <div class="current-main">
-          <div class="current-icon-group">
-            <div id="current-icon" class="current-icon">☀️</div>
-            <div id="current-desc" class="current-desc">Clear Sky</div>
+      <section class="stats-section">
+        <div class="stat-card">
+          <div class="stat-icon humidity-icon">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6 2 4 8 4 12a8 8 0 0 0 16 0c0-4-2-10-8-10z"/></svg>
           </div>
-          <div class="current-temp-group">
-            <div id="current-temp" class="current-temp">--</div>
-            <div class="current-hilo">
-              <span>H: <strong id="current-high">--</strong></span>
-              <span>L: <strong id="current-low">--</strong></span>
-            </div>
+          <div class="stat-info">
+            <span class="stat-label">Humidity</span>
+            <span id="current-humidity" class="stat-value">--</span>
           </div>
         </div>
-
-        <div class="current-details">
-          <div class="detail-card">
-            <span class="detail-icon">💧</span>
-            <span class="detail-label">Humidity</span>
-            <span id="current-humidity" class="detail-value">--</span>
+        <div class="stat-card">
+          <div class="stat-icon wind-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/>
+            </svg>
           </div>
-          <div class="detail-card">
-            <span class="detail-icon">💨</span>
-            <span class="detail-label">Wind</span>
-            <span id="current-wind" class="detail-value">--</span>
+          <div class="stat-info">
+            <span class="stat-label">Wind Speed</span>
+            <span id="current-wind" class="stat-value">--</span>
           </div>
-          <div class="detail-card">
-            <span class="detail-icon">📅</span>
-            <span class="detail-label">Today's High</span>
-            <span id="detail-high" class="detail-value">--</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon high-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="18 15 12 9 6 15"/>
+            </svg>
           </div>
-          <div class="detail-card">
-            <span class="detail-icon">🌡️</span>
-            <span class="detail-label">Today's Low</span>
-            <span id="detail-low" class="detail-value">--</span>
+          <div class="stat-info">
+            <span class="stat-label">Today's High</span>
+            <span id="detail-high" class="stat-value">--</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon low-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Today's Low</span>
+            <span id="detail-low" class="stat-value">--</span>
           </div>
         </div>
       </section>
 
       <section class="forecast-section">
         <h3 class="section-title">7-Day Forecast</h3>
-        <div id="forecast-container" class="forecast-grid"></div>
+        <div id="forecast-container" class="forecast-scroll"></div>
       </section>
 
     </main>
 
     <footer class="app-footer">
-      <p>
-        Data from
-        <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer">Open-Meteo</a>
-        &nbsp;·&nbsp; No API key required
-      </p>
+      <span>Powered by <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer">Open-Meteo</a></span>
     </footer>
 
   </div>
