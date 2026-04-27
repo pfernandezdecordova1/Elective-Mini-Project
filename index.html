@@ -9,7 +9,6 @@
 <body>
   <div class="app-container">
 
-    <!-- ── Header / Search ───────────────────────────────────── -->
     <header class="app-header">
       <div class="app-title">
         <span class="title-icon">🌤️</span>
@@ -30,23 +29,19 @@
       </div>
     </header>
 
-    <!-- ── Loading ────────────────────────────────────────────── -->
     <div id="loading" class="state-panel" role="status" aria-live="polite">
       <div class="spinner"></div>
       <p>Fetching weather data…</p>
     </div>
 
-    <!-- ── Error ──────────────────────────────────────────────── -->
     <div id="error" class="state-panel hidden" role="alert">
       <div class="error-icon">⚠️</div>
       <p id="error-message">Something went wrong.</p>
       <button id="retry-btn" class="retry-btn">Try Again</button>
     </div>
 
-    <!-- ── Weather Content ────────────────────────────────────── -->
     <main id="weather-content" class="hidden">
 
-      <!-- Current Conditions -->
       <section class="current-section">
         <div class="current-location">
           <span class="pin-icon">📍</span>
@@ -92,7 +87,6 @@
         </div>
       </section>
 
-      <!-- 7-Day Forecast -->
       <section class="forecast-section">
         <h3 class="section-title">7-Day Forecast</h3>
         <div id="forecast-container" class="forecast-grid"></div>
@@ -100,7 +94,6 @@
 
     </main>
 
-    <!-- ── Footer ─────────────────────────────────────────────── -->
     <footer class="app-footer">
       <p>
         Data from
