@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- ── Header / Search ───────────────────────────────────── -->
+    <header class="app-header">
+      <div class="app-title">
+        <span class="title-icon">🌤️</span>
+        <span>Weather Dashboard</span>
+      </div>
+      <div class="search-controls">
+        <div class="search-bar">
+          <input
+            type="text"
+            id="search-input"
+            placeholder="Search city…"
+            aria-label="City search"
+            autocomplete="off"
+          />
+          <button id="search-btn" aria-label="Search">Search</button>
+        </div>
+        <button id="unit-toggle" class="unit-btn" aria-label="Toggle temperature unit">°F</button>
+      </div>
+    </header>
+
+    <!-- ── Loading ────────────────────────────────────────────── -->
+    <div id="loading" class="state-panel" role="status" aria-live="polite">
+      <div class="spinner"></div>
+      <p>Fetching weather data…</p>
+    </div>
+
+    <!-- ── Error ──────────────────────────────────────────────── -->
+    <div id="error" class="state-panel hidden" role="alert">
+      <div class="error-icon">⚠️</div>
+      <p id="error-message">Something went wrong.</p>
+      <button id="retry-btn" class="retry-btn">Try Again</button>
+    </div>
+
+    <!-- ── Weather Content ────────────────────────────────────── -->
+    <main id="weather-content" class="hidden">
+
+      <!-- Current Conditions -->
+      <section class="current-section">
+        <div class="current-location">
+          <span class="pin-icon">📍</span>
+          <h2 id="city-name">Boston, MA</h2>
+          <span id="last-updated" class="last-updated"></span>
+        </div>
+
+        <div class="current-main">
+          <div class="current-icon-group">
+            <div id="current-icon" class="current-icon">☀️</div>
+            <div id="current-desc" class="current-desc">Clear Sky</div>
+          </div>
+          <div class="current-temp-group">
+            <div id="current-temp" class="current-temp">--</div>
+            <div class="current-hilo">
+              <span>H: <strong id="current-high">--</strong></span>
+              <span>L: <strong id="current-low">--</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="current-details">
+          <div class="detail-card">
+            <span class="detail-icon">💧</span>
+            <span class="detail-label">Humidity</span>
+            <span id="current-humidity" class="detail-value">--</span>
+          </div>
+          <div class="detail-card">
+            <span class="detail-icon">💨</span>
+            <span class="detail-label">Wind</span>
+            <span id="current-wind" class="detail-value">--</span>
+          </div>
+          <div class="detail-card">
+            <span class="detail-icon">📅</span>
+            <span class="detail-label">Today's High</span>
+            <span id="detail-high" class="detail-value">--</span>
+          </div>
+          <div class="detail-card">
+            <span class="detail-icon">🌡️</span>
+            <span class="detail-label">Today's Low</span>
+            <span id="detail-low" class="detail-value">--</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7-Day Forecast -->
+      <section class="forecast-section">
+        <h3 class="section-title">7-Day Forecast</h3>
+        <div id="forecast-container" class="forecast-grid"></div>
+      </section>
+
+    </main>
+
+    <!-- ── Footer ─────────────────────────────────────────────── -->
+    <footer class="app-footer">
+      <p>
+        Data from
+        <a href="https://open-meteo.com" target="_blank" rel="noopener noreferrer">Open-Meteo</a>
+        &nbsp;·&nbsp; No API key required
+      </p>
+    </footer>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
