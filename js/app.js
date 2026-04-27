@@ -1,9 +1,3 @@
-/* ─────────────────────────────────────────────────────────────────────────────
-   Weather Dashboard — app.js
-   Uses Open-Meteo (no API key required) + Open-Meteo Geocoding API
-───────────────────────────────────────────────────────────────────────────── */
-
-// ── Constants ────────────────────────────────────────────────────────────────
 const DEFAULT_CITY     = 'Boston';
 const DEFAULT_LAT      = 42.36;
 const DEFAULT_LON      = -71.06;
@@ -12,13 +6,10 @@ const DEFAULT_TIMEZONE = 'America/New_York';
 const WEATHER_API   = 'https://api.open-meteo.com/v1/forecast';
 const GEOCODING_API = 'https://geocoding-api.open-meteo.com/v1/search';
 
-// ── State ────────────────────────────────────────────────────────────────────
-let currentUnit     = 'C';   // 'C' or 'F'
-let currentData     = null;  // raw API response
+let currentUnit     = 'C';
+let currentData     = null;
 let currentCityName = '';
 
-// ── Weather Code → Description / Icon / Theme ─────────────────────────────
-// Source: https://open-meteo.com/en/docs/weathercode
 const WEATHER_INFO = {
   0:  { desc: 'Clear Sky',               icon: '☀️',  theme: 'sunny'  },
   1:  { desc: 'Mainly Clear',            icon: '🌤️', theme: 'sunny'  },
@@ -54,7 +45,6 @@ function getWeatherInfo(code) {
   return WEATHER_INFO[code] ?? { desc: 'Unknown', icon: '🌡️', theme: 'clear' };
 }
 
-// ── Unit Helpers ─────────────────────────────────────────────────────────────
 function toFahrenheit(c) {
   return (c * 9) / 5 + 32;
 }
@@ -66,9 +56,7 @@ function formatTemp(tempC) {
   return `${Math.round(tempC)}°C`;
 }
 
-// ── Date Helpers ─────────────────────────────────────────────────────────────
 function getDayLabel(dateStr) {
-  // dateStr is "YYYY-MM-DD" — parse without timezone shift
   const [y, m, d] = dateStr.split('-').map(Number);
   const date  = new Date(y, m - 1, d);
   const today = new Date();
@@ -83,10 +71,8 @@ function getTimeLabel() {
   return new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 }
 
-// ── DOM Shortcuts ─────────────────────────────────────────────────────────────
 const $ = (id) => document.getElementById(id);
 
-// ── UI State Helpers ─────────────────────────────────────────────────────────
 function showLoading() {
   $('loading').classList.remove('hidden');
   $('error').classList.add('hidden');
@@ -106,9 +92,7 @@ function showContent() {
   $('weather-content').classList.remove('hidden');
 }
 
-// ── Theme Application ────────────────────────────────────────────────────────
 function applyTheme(theme) {
-  // Remove any existing theme classes
   document.body.className = document.body.className
     .split(' ')
     .filter((c) => !c.startsWith('theme-'))
@@ -117,7 +101,6 @@ function applyTheme(theme) {
   document.body.classList.add(`theme-${theme}`);
 }
 
-// ── Render ────────────────────────────────────────────────────────────────────
 function renderWeather() {
   if (!currentData) return;
 
@@ -126,7 +109,6 @@ function renderWeather() {
 
   applyTheme(info.theme);
 
-  // ── Current conditions
   $('city-name').textContent     = currentCityName;
   $('last-updated').textContent  = `Updated ${getTimeLabel()}`;
   $('current-icon').textContent  = info.icon;
@@ -139,7 +121,6 @@ function renderWeather() {
   $('detail-high').textContent   = formatTemp(daily.temperature_2m_max[0]);
   $('detail-low').textContent    = formatTemp(daily.temperature_2m_min[0]);
 
-  // ── 7-day forecast (skip index 0 = today, show days 1-7)
   const container = $('forecast-container');
   container.innerHTML = '';
 
@@ -162,7 +143,6 @@ function renderWeather() {
   showContent();
 }
 
-// ── API Calls ─────────────────────────────────────────────────────────────────
 async function fetchWeatherData(lat, lon, timezone) {
   const params = new URLSearchParams({
     latitude:   lat,
@@ -193,14 +173,12 @@ async function fetchGeocode(city) {
   return data.results[0];
 }
 
-// ── Load Weather for Known Coords ─────────────────────────────────────────────
 async function loadWeather(cityName, lat, lon, timezone) {
   showLoading();
   try {
     const data        = await fetchWeatherData(lat, lon, timezone);
     currentData       = data;
     currentCityName   = cityName;
-    // Persist preference
     localStorage.setItem(
       'weatherPreference',
       JSON.stringify({ cityName, lat, lon, timezone })
@@ -211,7 +189,6 @@ async function loadWeather(cityName, lat, lon, timezone) {
   }
 }
 
-// ── City Search ───────────────────────────────────────────────────────────────
 async function handleSearch() {
   const input    = $('search-input');
   const cityName = input.value.trim();
@@ -235,21 +212,18 @@ async function handleSearch() {
   }
 }
 
-// ── Unit Toggle ───────────────────────────────────────────────────────────────
 function toggleUnit() {
   currentUnit        = currentUnit === 'C' ? 'F' : 'C';
   $('unit-toggle').textContent = currentUnit === 'C' ? '°F' : '°C';
   renderWeather();
 }
 
-// ── Event Listeners ───────────────────────────────────────────────────────────
 $('search-btn').addEventListener('click', handleSearch);
 $('search-input').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') handleSearch();
 });
 $('unit-toggle').addEventListener('click', toggleUnit);
 $('retry-btn').addEventListener('click', () => {
-  // Retry with whatever city is saved, or default
   const saved = localStorage.getItem('weatherPreference');
   if (saved) {
     try {
@@ -257,13 +231,11 @@ $('retry-btn').addEventListener('click', () => {
       loadWeather(cityName, lat, lon, timezone);
       return;
     } catch {
-      /* fall through to default */
     }
   }
   loadWeather(DEFAULT_CITY, DEFAULT_LAT, DEFAULT_LON, DEFAULT_TIMEZONE);
 });
 
-// ── Init ──────────────────────────────────────────────────────────────────────
 (function init() {
   const saved = localStorage.getItem('weatherPreference');
   if (saved) {

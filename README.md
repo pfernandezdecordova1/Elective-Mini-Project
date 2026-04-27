@@ -1,17 +1,10 @@
 # Weather Dashboard — Elective Mini Project
 
-A weather dashboard built with vanilla HTML, CSS, and JavaScript that fetches real weather data from the free [Open-Meteo API](https://open-meteo.com) — no API key required.
+A weather dashboard built with vanilla HTML, CSS, and JavaScript that fetches real weather data from the free [Open-Meteo API](https://open-meteo.com) — no API key used. 
 
 ## Live Site
+- https://pfernandezdecordova1.github.io/ElectiveMiniProject
 
-> Deploy to GitHub Pages and add the link here:  
-> **https://your-username.github.io/Elective-Mini-Project/**
-
-## Screenshot
-
-> Add a screenshot after deploying.
-
----
 
 ## What the Dashboard Shows
 
