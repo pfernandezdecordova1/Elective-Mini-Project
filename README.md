@@ -8,38 +8,19 @@ A weather dashboard built with vanilla HTML, CSS, and JavaScript that fetches re
 
 ## What the Dashboard Shows
 
-| Feature | Details |
-|---|---|
-| **Current conditions** | Temperature, weather description + icon, humidity, wind speed, today's high/low |
-| **7-day forecast** | Icon, description, high & low temperature for each day |
-| **City search** | Type any city — geocoded via Open-Meteo's free Geocoding API |
-| **Unit toggle** | Switch between °C and °F with one click |
-| **Persistent city** | `localStorage` remembers your last searched city |
-| **Weather themes** | Background gradient changes to match the current conditions (sunny, cloudy, rain, storm, snow, fog) |
-| **Loading state** | Spinner shown while the API is loading |
-| **Error handling** | Friendly error message + Retry button if the API fails or city is not found |
+The dashboard shows current conditions (temperature, weather description + icon, humidity, wind speed, and today's high/low) along with a 7-day forecast displaying an icon, description, and high & low temperature for each day. Users can search for any city, which is geocoded via Open-Meteo's free Geocoding API, and toggle between °C and °F with one click. The last searched city is saved with localStorage. The background gradient changes to match current conditions (sunny, cloudy, rain, storm, snow, or fog), a spinner is shown while data loads, and a friendly error message with a Retry button appears if the API fails or a city is not found.
 
-## API Used
-
-**[Open-Meteo](https://open-meteo.com)**  
-- No sign-up or API key required  
-- Weather endpoint: `https://api.open-meteo.com/v1/forecast`  
-- Geocoding endpoint: `https://geocoding-api.open-meteo.com/v1/search`
-
-Fields used: `temperature_2m`, `wind_speed_10m`, `relative_humidity_2m`, `weather_code`, `temperature_2m_max`, `temperature_2m_min`
-
----
 
 ## What I Learned About Working with APIs
 
-Working with this project taught me several key things about fetching and displaying API data:
-
-- **`fetch()` and async/await**: The Fetch API returns a Promise, so you need `async/await` (or `.then()`) to handle the response without blocking the page. I learned how to `await` the fetch itself *and* the `.json()` call that parses the response body.
-- **Understanding JSON structure**: I used the raw API URL in my browser first to see the exact shape of the response before writing any JavaScript. This made it much easier to target the right fields (e.g., `data.current.temperature_2m`).
-- **Weather codes are just numbers**: Open-Meteo returns codes like `0`, `2`, `63` instead of text descriptions. I built a lookup object that maps each code to a human-readable description, an emoji icon, and a CSS theme class.
-- **Geocoding**: To let users search by city name, I used a second API call to the Open-Meteo Geocoding endpoint, which returns coordinates and a timezone string — both needed for the weather request.
-- **Error handling matters**: Network requests fail for many reasons. Wrapping calls in `try/catch` and showing a friendly UI message (with a Retry button) makes the app feel polished and safe to use.
-- **`localStorage` for persistence**: Saving the user's last city to `localStorage` meant the dashboard feels personalized without any backend.
+- `fetch()` is how JavaScript talks to an API — it sends a request and waits for data to come back
+- You need `async/await` so the page doesn't freeze while waiting for the API response
+- API data comes back as JSON, which looks like a JavaScript object — you have to call `.json()` to actually read it
+- I pasted the API URL into my browser first to see what the data looked like before writing any code
+- The weather API gives back a number (called a weather code) instead of words like "sunny" — I had to build my own lookup to turn those numbers into descriptions and icons
+- To let users search by city name, I had to make a second API call to convert the city name into coordinates
+- I wrapped all my API calls in `try/catch` so that if something goes wrong, the app shows a friendly error message instead of just breaking
+- I used `localStorage` to save the user's last city so it still shows up the next time they open the page
 
 ---
 
