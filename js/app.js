@@ -45,6 +45,28 @@ function getWeatherInfo(code) {
   return WEATHER_INFO[code] ?? { desc: 'Unknown', icon: '🌡️', theme: 'clear' };
 }
 
+function getUVLabel(uv) {
+  if (uv <= 2)  return { label: 'Low',       color: '#a9e34b' };
+  if (uv <= 5)  return { label: 'Moderate',  color: '#ffd43b' };
+  if (uv <= 7)  return { label: 'High',      color: '#ffa94d' };
+  if (uv <= 10) return { label: 'Very High', color: '#ff6b6b' };
+  return              { label: 'Extreme',   color: '#cc5de8' };
+}
+
+function getWeatherTip(code, humidity, windSpeed) {
+  if ([95, 96, 99].includes(code)) return 'Thunderstorm expected — stay indoors and avoid open areas.';
+  if ([65, 82].includes(code))     return 'Heavy rain today — bring a waterproof jacket! ☔';
+  if ([61, 63, 51, 53, 55, 80, 81].includes(code)) return 'Rain expected — don\'t forget your umbrella! 🌂';
+  if ([71, 73, 75, 85, 86].includes(code)) return 'Snow is falling — drive carefully and layer up! ❄️';
+  if ([56, 57, 66, 67].includes(code)) return 'Freezing rain — watch out for icy surfaces! 🧊';
+  if ([45, 48].includes(code)) return 'Foggy conditions — reduce speed if driving. 🌫️';
+  if (windSpeed > 40)  return 'Very windy outside — secure loose objects. 💨';
+  if (humidity > 85)   return 'High humidity today — it may feel hotter than it is. 💧';
+  if ([0, 1].includes(code)) return 'Beautiful clear sky — great day to go outside! ☀️';
+  if ([2, 3].includes(code)) return 'Cloudy skies today — a light layer might help. 🧥';
+  return 'Have a great day! 🌈';
+}
+
 function toFahrenheit(c) {
   return (c * 9) / 5 + 32;
 }
@@ -317,10 +339,15 @@ function drawSunRays() {
 function renderWeather() {
   if (!currentData) return;
 
-  const { current, daily } = currentData;
+  const { current, daily, hourly } = currentData;
   const info = getWeatherInfo(current.weather_code);
 
   applyTheme(info.theme);
+
+  // ── Tip banner
+  const tip = getWeatherTip(current.weather_code, current.relative_humidity_2m, current.wind_speed_10m);
+  $('tip-text').textContent = tip;
+  $('weather-tip').classList.remove('hidden');
 
   $('city-name').textContent    = currentCityName;
   $('last-updated').textContent = `Updated ${getTimeLabel()}`;
@@ -332,6 +359,75 @@ function renderWeather() {
   $('current-wind').textContent  = `${Math.round(current.wind_speed_10m)} km/h`;
   $('detail-high').textContent   = formatTemp(daily.temperature_2m_max[0]);
   $('detail-low').textContent    = formatTemp(daily.temperature_2m_min[0]);
+  $('feels-like').textContent    = formatTemp(current.apparent_temperature);
+
+  const uv      = Math.round(daily.uv_index_max[0]);
+  const uvInfo  = getUVLabel(uv);
+  $('uv-index').textContent      = uv;
+  const uvSpan = $('uv-label');
+  uvSpan.textContent             = uvInfo.label;
+  uvSpan.style.color             = uvInfo.color;
+
+  // ── Sunrise / Sunset
+  const sunriseStr = daily.sunrise[0];  // "YYYY-MM-DDTHH:MM"
+  const sunsetStr  = daily.sunset[0];
+  const sunrise    = new Date(sunriseStr);
+  const sunset     = new Date(sunsetStr);
+  const fmt        = { hour: 'numeric', minute: '2-digit' };
+  $('sunrise-time').textContent = sunrise.toLocaleTimeString('en-US', fmt);
+  $('sunset-time').textContent  = sunset.toLocaleTimeString('en-US', fmt);
+
+  const daylightMs  = sunset - sunrise;
+  const daylightH   = Math.floor(daylightMs / 3_600_000);
+  const daylightM   = Math.floor((daylightMs % 3_600_000) / 60_000);
+  $('daylight-duration').textContent = `${daylightH}h ${daylightM}m of daylight`;
+
+  const now          = new Date();
+  const totalMs      = sunset - sunrise;
+  const elapsedMs    = Math.max(0, Math.min(now - sunrise, totalMs));
+  const progress     = elapsedMs / totalMs;   // 0..1
+  const arcLen       = 283;  // approx full arc length
+  $('arc-fill').style.strokeDasharray  = arcLen;
+  $('arc-fill').style.strokeDashoffset = arcLen * (1 - Math.min(progress, 1));
+
+  // Position sun dot on arc
+  const angle    = Math.PI * progress;   // 0 = left, PI = right
+  const cx       = 10 + 180 * progress;
+  const arcR     = 90;
+  const centerX  = 100;
+  const centerY  = 100;
+  const dotX     = centerX + arcR * Math.cos(Math.PI - angle);
+  const dotY     = centerY - arcR * Math.sin(angle);
+  $('sun-dot').setAttribute('cx', dotX.toFixed(1));
+  $('sun-dot').setAttribute('cy', dotY.toFixed(1));
+
+  // ── Hourly forecast (next 24 slots from current hour)
+  const hourlyContainer = $('hourly-container');
+  hourlyContainer.innerHTML = '';
+  const times  = hourly.time;
+  const hTemps = hourly.temperature_2m;
+  const hCodes = hourly.weather_code;
+
+  const nowHour   = new Date();
+  nowHour.setMinutes(0, 0, 0);
+  const nowIso    = nowHour.toISOString().slice(0, 16);
+  let startIdx    = times.findIndex(t => t >= nowIso);
+  if (startIdx === -1) startIdx = 0;
+
+  for (let i = startIdx; i < Math.min(startIdx + 25, times.length); i++) {
+    const hInfo  = getWeatherInfo(hCodes[i]);
+    const hDate  = new Date(times[i]);
+    const isNow  = i === startIdx;
+    const hLabel = isNow ? 'Now' : hDate.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+    const card   = document.createElement('div');
+    card.className = 'hourly-card' + (isNow ? ' now' : '');
+    card.innerHTML = `
+      <span class="hourly-time">${hLabel}</span>
+      <span class="hourly-emoji">${hInfo.icon}</span>
+      <span class="hourly-temp">${formatTemp(hTemps[i])}</span>
+    `;
+    hourlyContainer.appendChild(card);
+  }
 
   $('weather-illustration').textContent = info.icon;
 
@@ -360,12 +456,13 @@ function renderWeather() {
 
 async function fetchWeatherData(lat, lon, timezone) {
   const params = new URLSearchParams({
-    latitude:   lat,
-    longitude:  lon,
-    timezone:   timezone,
+    latitude:      lat,
+    longitude:     lon,
+    timezone:      timezone,
     forecast_days: 8,
-    current:    'temperature_2m,wind_speed_10m,relative_humidity_2m,weather_code',
-    daily:      'temperature_2m_max,temperature_2m_min,weather_code',
+    current:  'temperature_2m,wind_speed_10m,relative_humidity_2m,weather_code,apparent_temperature',
+    daily:    'temperature_2m_max,temperature_2m_min,weather_code,sunrise,sunset,uv_index_max',
+    hourly:   'temperature_2m,weather_code',
   });
   const res = await fetch(`${WEATHER_API}?${params}`);
   if (!res.ok) throw new Error(`Weather API returned ${res.status}`);

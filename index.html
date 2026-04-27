@@ -85,6 +85,11 @@
         </div>
       </section>
 
+      <div id="weather-tip" class="weather-tip hidden">
+        <span class="tip-icon">💡</span>
+        <span id="tip-text"></span>
+      </div>
+
       <section class="stats-section">
         <div class="stat-card">
           <div class="stat-icon humidity-icon">
@@ -104,6 +109,30 @@
           <div class="stat-info">
             <span class="stat-label">Wind Speed</span>
             <span id="current-wind" class="stat-value">--</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon feels-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"/>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">Feels Like</span>
+            <span id="feels-like" class="stat-value">--</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon uv-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>
+            </svg>
+          </div>
+          <div class="stat-info">
+            <span class="stat-label">UV Index</span>
+            <span id="uv-index" class="stat-value">--</span>
+            <span id="uv-label" class="stat-sublabel"></span>
           </div>
         </div>
         <div class="stat-card">
@@ -128,6 +157,37 @@
             <span id="detail-low" class="stat-value">--</span>
           </div>
         </div>
+      </section>
+
+      <section class="sun-section">
+        <h3 class="section-title">Sunrise &amp; Sunset</h3>
+        <div class="sun-card">
+          <div class="sun-times">
+            <div class="sun-time-item">
+              <span class="sun-emoji">🌅</span>
+              <span class="sun-time-label">Sunrise</span>
+              <span id="sunrise-time" class="sun-time-value">--</span>
+            </div>
+            <div class="sun-arc-container">
+              <svg class="sun-arc-svg" viewBox="0 0 200 110" preserveAspectRatio="none">
+                <path class="arc-track" d="M10,100 A90,90 0 0,1 190,100" fill="none" stroke-width="3"/>
+                <path id="arc-fill" d="M10,100 A90,90 0 0,1 190,100" fill="none" stroke-width="3"/>
+                <circle id="sun-dot" cx="10" cy="100" r="8"/>
+              </svg>
+            </div>
+            <div class="sun-time-item right">
+              <span class="sun-emoji">🌇</span>
+              <span class="sun-time-label">Sunset</span>
+              <span id="sunset-time" class="sun-time-value">--</span>
+            </div>
+          </div>
+          <p id="daylight-duration" class="daylight-duration"></p>
+        </div>
+      </section>
+
+      <section class="hourly-section">
+        <h3 class="section-title">Next 24 Hours</h3>
+        <div id="hourly-container" class="hourly-scroll"></div>
       </section>
 
       <section class="forecast-section">
