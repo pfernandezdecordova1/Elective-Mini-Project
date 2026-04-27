@@ -3,7 +3,8 @@
 A weather dashboard built with vanilla HTML, CSS, and JavaScript that fetches real weather data from the free [Open-Meteo API](https://open-meteo.com) — no API key used. 
 
 ## Live Site
-- https://pfernandezdecordova1.github.io/ElectiveMiniProject
+- https://github.com/pfernandezdecordova1/Elective-Mini-Project.git
+
 
 
 ## What the Dashboard Shows
